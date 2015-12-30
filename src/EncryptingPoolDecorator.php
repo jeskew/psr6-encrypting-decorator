@@ -42,8 +42,8 @@ abstract class EncryptingPoolDecorator implements CacheItemPoolInterface
 
         // Add all the fetched items to the memoized set, decorating each one
         // with an encryption-aware instance of CacheItemInterface
-        array_walk($toMemoize, function ($leaf, $key) {
-            $this->memoized[$key] = $this->decorate($leaf);
+        array_walk($toMemoize, function (CacheItemInterface $leaf) {
+            $this->memoized[$leaf->getKey()] = $this->decorate($leaf);
         });
 
         // Pull the sought items from the memoized set

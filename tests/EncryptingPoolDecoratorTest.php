@@ -23,6 +23,26 @@ abstract class EncryptingPoolDecoratorTest extends \PHPUnit_Framework_TestCase
         $this->instance = $this->getInstance($this->decorated);
     }
 
+    public function testProxiesClearCallsToDecoratedCache()
+    {
+        $this->decorated->expects($this->once())
+            ->method('clear')
+            ->with()
+            ->willReturn(true);
+
+        $this->assertTrue($this->instance->clear());
+    }
+
+    public function testProxiesCommitCallsToDecoratedCache()
+    {
+        $this->decorated->expects($this->once())
+            ->method('commit')
+            ->with()
+            ->willReturn(true);
+
+        $this->assertTrue($this->instance->commit());
+    }
+
     public function testProxiesGetItemCallsToDecoratedCache()
     {
         $id = microtime();
@@ -33,6 +53,50 @@ abstract class EncryptingPoolDecoratorTest extends \PHPUnit_Framework_TestCase
             ->willReturn(new ArrayCacheItem($id));
 
         $this->instance->getItem($id);
+    }
+
+    public function testProxiesGetItemsCallsToDecoratedCache()
+    {
+        $ids = [rand(0, 9), rand(10, 19), rand(20, 29)];
+
+        $this->decorated->expects($this->once())
+            ->method('getItems')
+            ->with($ids)
+            ->willReturn(array_map(function ($id) {
+                return new ArrayCacheItem($id);
+            }, $ids));
+
+        $items = $this->instance->getItems($ids);
+
+        $this->assertCount(count($ids), $items);
+        $this->assertSame($ids, array_values(array_map(function ($item) {
+            return $item->getKey();
+        }, $items)));
+    }
+
+    public function testOnlyProxiesGetItemsCallsForItemsNotAlreadyMemoized()
+    {
+        $ids = [rand(0, 9), rand(10, 19), rand(20, 29)];
+
+        $this->decorated->expects($this->once())
+            ->method('getItem')
+            ->with($ids[0])
+            ->willReturn(new ArrayCacheItem($ids[0]));
+
+        $this->decorated->expects($this->once())
+            ->method('getItems')
+            ->with(array_values(array_intersect_key($ids, [1 => true, 2 => true])))
+            ->willReturn(array_map(function ($id) {
+                return new ArrayCacheItem($id);
+            }, $ids));
+
+        $this->instance->getItem($ids[0]);
+        $items = $this->instance->getItems($ids);
+
+        $this->assertCount(count($ids), $items);
+        $this->assertSame($ids, array_values(array_map(function ($item) {
+            return $item->getKey();
+        }, $items)));
     }
 
     public function testProxiesDeleteItemCallsToDecoratedCache()
@@ -47,12 +111,25 @@ abstract class EncryptingPoolDecoratorTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($this->instance->deleteItem($id));
     }
 
+    public function testProxiesDeleteItemsCallsToDecoratedCache()
+    {
+        $ids = [rand(0, 9), rand(10, 19), rand(20, 29)];
+
+        $this->decorated->expects($this->once())
+            ->method('deleteItems')
+            ->with($ids)
+            ->willReturn(true);
+
+        $this->assertTrue($this->instance->deleteItems($ids));
+    }
+
     /**
-     * @dataProvider cacheableDataProvider
+     * @dataProvider savableDataProvider
      *
      * @param mixed $data
+     * @param string $method
      */
-    public function testEncryptsDataBeforePassingToDecoratedCache($data)
+    public function testEncryptsDataBeforeSavingInDecoratedCache($data, $method)
     {
         $id = microtime();
 
@@ -62,7 +139,7 @@ abstract class EncryptingPoolDecoratorTest extends \PHPUnit_Framework_TestCase
             ->willReturn(new ArrayCacheItem($id));
 
         $this->decorated->expects($this->once())
-            ->method('save')
+            ->method($method)
             ->with(
                 $this->callback(function ($arg) use ($data) {
                     return $arg !== $data;
@@ -70,7 +147,34 @@ abstract class EncryptingPoolDecoratorTest extends \PHPUnit_Framework_TestCase
             );
 
         $this->instance
-            ->save($this->instance->getItem($id)->set($data));
+            ->{$method}($this->instance->getItem($id)->set($data));
+    }
+
+    public function savableDataProvider()
+    {
+        return array_merge(
+            array_map(function (array $arr) {
+                return array_merge($arr, ['save']);
+            }, $this->cacheableDataProvider()),
+            array_map(function (array $arr) {
+                return array_merge($arr, ['saveDeferred']);
+            }, $this->cacheableDataProvider())
+        );
+    }
+
+    /**
+     * @dataProvider savableDataProvider
+     *
+     * @param mixed $data
+     * @param string $method
+     *
+     * @expectedException \Psr\Cache\InvalidArgumentException
+     */
+    public function testThrowsExceptionWhenUnsavableItemsProvidedToSave($data, $method)
+    {
+        $item = (new ArrayCacheItem('key'))->set($data);
+
+        $this->instance->{$method}($item);
     }
 
     /**
@@ -85,6 +189,8 @@ abstract class EncryptingPoolDecoratorTest extends \PHPUnit_Framework_TestCase
         $id = microtime();
 
         $instance->save($instance->getItem($id)->set($data));
+
+        $instance = $this->getInstance($decorated);
 
         $this->assertNotEquals($data, $decorated->getItem($id)->get());
         $this->assertEquals($data, $instance->getItem($id)->get());
