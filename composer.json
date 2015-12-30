@@ -1,0 +1,30 @@
+{
+    "name": "jeskew/psr6-encrypting-decorator",
+    "description": "For when policy or paranoia prevent you from leaving sensitive cache entries unencrypted at rest.",
+    "minimum-stability": "stable",
+    "license": "Apache-2.0",
+    "authors": [
+        {
+            "name": "Jonathan Eskew",
+            "email": "jonathan@jeskew.net"
+        }
+    ],
+    "require": {
+        "php": ">=5.5",
+        "ext-openssl": "*",
+        "psr/cache": "^1.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^4.8"
+    },
+    "autoload": {
+        "psr-4": {
+            "Jeskew\\Cache\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Jeskew\\Cache\\": "tests/"
+        }
+    }
+}
