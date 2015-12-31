@@ -74,13 +74,8 @@ abstract class EncryptingPoolDecorator implements CacheItemPoolInterface
 
     public function save(CacheItemInterface $item)
     {
-        if (
-            $item instanceof EncryptingItemDecorator
-            && $this->validateEncryption($item)
-        ) {
-            $this->decorated->save($item->getDecorated());
-
-            return $this;
+        if ($this->validateEncryption($item)) {
+            return $this->decorated->save($item->getDecorated());
         }
 
         throw new InvalidArgumentException('The provided cache item cannot'
@@ -89,13 +84,8 @@ abstract class EncryptingPoolDecorator implements CacheItemPoolInterface
 
     public function saveDeferred(CacheItemInterface $item)
     {
-        if (
-            $item instanceof EncryptingItemDecorator
-            && $this->validateEncryption($item)
-        ) {
-            $this->decorated->saveDeferred($item->getDecorated());
-
-            return $this;
+        if ($this->validateEncryption($item)) {
+            return $this->decorated->saveDeferred($item->getDecorated());
         }
 
         throw new InvalidArgumentException('The provided cache item cannot'
