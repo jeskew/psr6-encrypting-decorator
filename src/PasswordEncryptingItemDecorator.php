@@ -62,7 +62,7 @@ class PasswordEncryptingItemDecorator extends EncryptingItemDecorator
         ));
     }
 
-    protected function authenticate($key, $cipherText)
+    private function authenticate($key, $cipherText)
     {
         return hash_hmac(
             'sha256',

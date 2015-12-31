@@ -78,6 +78,4 @@ abstract class EncryptingItemDecorator implements CacheItemInterface
     abstract protected function decrypt($data);
 
     abstract protected function isDecryptable();
-
-    abstract protected function authenticate($key, $cipherText);
 }
