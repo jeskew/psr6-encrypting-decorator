@@ -4,7 +4,7 @@
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/jeskew/psr6-encrypting-decorator/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/jeskew/psr6-encrypting-decorator/?branch=master)
 [![Code Coverage](https://scrutinizer-ci.com/g/jeskew/psr6-encrypting-decorator/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/jeskew/psr6-encrypting-decorator/?branch=master)
 [![Apache 2 License](https://img.shields.io/packagist/l/jeskew/psr6-encrypting-decorator.svg?style=flat)](https://www.apache.org/licenses/LICENSE-2.0.html)
-[![Total Downloads](https://img.shields.io/packagist/dt/jeskew/psr6-encrypting-decorator.svg?style=flat)](https://packagist.org/packages/jeskew/doctrine-cache-encrypter)
+[![Total Downloads](https://img.shields.io/packagist/dt/jeskew/psr6-encrypting-decorator.svg?style=flat)](https://packagist.org/packages/jeskew/psr6-encrypting-decorator)
 [![Author](http://img.shields.io/badge/author-@jreskew-blue.svg?style=flat-square)](https://twitter.com/jreskew)
 
 Having to encrypt your data at rest shouldn't keep you from using the open-source
@@ -23,15 +23,11 @@ applications. Use encrypted caches sparingly.
 > This package provides two cache decorators, one that encrypts data using
 a pass phrase and one that does so with a key pair.
 
-First, create your PSR-6 cache as you normally would:
-```php
-$cache instanceof \Psr\Cache\CacheItemPoolInterface === true;
-```
-
-Second, wrap your cache with an encrypting decorator:
+First, create your PSR-6 cache as you normally would, then wrap your cache with
+an encrypting decorator:
 ```php
 $encryptedCache = new \Jeskew\Cache\PasswordEncryptingPoolDecorator(
-    $cache,
+    $cache, // an instance of \Psr\Cache\CacheItemPoolInterface
     $password,
     $cipher // optional, defaults to 'aes-256-cbc'
 );
@@ -64,7 +60,7 @@ $encryptedCache = new \Jeskew\Cache\EnvelopeEncryptionPoolDecorator(
 );
 ```
 
-> The certificates can be a valid x509 certificate, a path to a PEM-encoded
+> The certificate can be a valid x509 certificate, a path to a PEM-encoded
 certificate file (the path must be prefaced with `file://`), or a PEM-encoded
 certificate string. The private key can be a path to a PEM-encoded private key
 file (the path must be prefaced with `file://`), or a PEM-encoded certificate

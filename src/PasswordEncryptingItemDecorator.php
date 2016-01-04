@@ -21,12 +21,10 @@ class PasswordEncryptingItemDecorator extends EncryptingItemDecorator
     {
         $data = $this->getDecorated()->get();
 
-        return is_array($data)
-            && $this->arrayHasKeys($data, ['encrypted', 'iv', 'cipher', 'mac'])
-            && $data['cipher'] === $this->cipher
-            && $data['mac'] === $this->authenticate(
+        return $data instanceof PasswordEncryptedValue
+            && $data->getMac() === $this->authenticate(
                 $this->getKey(),
-                $data['encrypted']
+                $data->getCipherText()
             );
     }
 
@@ -43,22 +41,22 @@ class PasswordEncryptingItemDecorator extends EncryptingItemDecorator
             $iv
         );
 
-        return [
-            'cipher' => $this->cipher,
-            'iv' => base64_encode($iv),
-            'mac' => $this->authenticate($this->getKey(), $encrypted),
-            'encrypted' => $encrypted,
-        ];
+        return new PasswordEncryptedValue(
+            $encrypted,
+            $this->cipher,
+            $iv,
+            $this->authenticate($this->getKey(), $encrypted)
+        );
     }
 
-    protected function decrypt($data)
+    protected function decrypt(EncryptedValue $data)
     {
         return unserialize(openssl_decrypt(
-            $data['encrypted'],
-            $this->cipher,
+            $data->getCipherText(),
+            $data->getMethod(),
             $this->password,
             0,
-            base64_decode($data['iv'])
+            $data->getInitializationVector()
         ));
     }
 

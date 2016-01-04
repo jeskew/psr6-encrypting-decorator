@@ -62,20 +62,9 @@ abstract class EncryptingItemDecorator implements CacheItemInterface
         return $this;
     }
 
-    protected function arrayHasKeys(array $input, array $keys)
-    {
-        foreach ($keys as $key) {
-            if (empty($input[$key])) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
     abstract protected function encrypt($data);
 
-    abstract protected function decrypt($data);
+    abstract protected function decrypt(EncryptedValue $data);
 
     abstract protected function isDecryptable();
 }

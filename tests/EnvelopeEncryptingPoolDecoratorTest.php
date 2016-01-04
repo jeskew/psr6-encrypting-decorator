@@ -1,7 +1,6 @@
 <?php
 namespace Jeskew\Cache;
 
-use Jeskew\Cache\Fixtures\ArrayCacheItem;
 use Psr\Cache\CacheItemPoolInterface;
 
 class EnvelopeEncryptingPoolDecoratorTest extends EncryptingPoolDecoratorTest

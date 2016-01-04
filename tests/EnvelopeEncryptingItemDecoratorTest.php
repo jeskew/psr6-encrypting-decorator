@@ -1,7 +1,7 @@
 <?php
 namespace Jeskew\Cache;
 
-use Jeskew\Cache\Fixtures\ArrayCacheItem;
+use Cache\Adapter\Common\CacheItem;
 use Psr\Cache\CacheItemInterface;
 
 class EnvelopeEncryptingItemDecoratorTest extends EncryptingItemDecoratorTest
@@ -19,7 +19,7 @@ class EnvelopeEncryptingItemDecoratorTest extends EncryptingItemDecoratorTest
     public function testVerifiesCertificateAndKey($cert, $key)
     {
         new EnvelopeEncryptingItemDecorator(
-            new ArrayCacheItem('key'),
+            new CacheItem('key'),
             $cert,
             $key,
             null,

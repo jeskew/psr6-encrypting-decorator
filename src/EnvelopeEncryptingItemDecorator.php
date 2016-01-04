@@ -32,17 +32,10 @@ class EnvelopeEncryptingItemDecorator extends EncryptingItemDecorator
     {
         $data = $this->getDecorated()->get();
 
-        return is_array($data)
-            && $this->arrayHasKeys($data, [
-                'encrypted',
-                'key',
-                'iv',
-                'cipher',
-                'signature',
-            ])
+        return $data instanceof EnvelopeEncryptedValue
             && openssl_verify(
-                $this->getKey() . $data['encrypted'],
-                base64_decode($data['signature']),
+                $this->getKey() . $data->getCipherText(),
+                $data->getSignature(),
                 $this->publicKey
             );
     }
@@ -70,29 +63,25 @@ class EnvelopeEncryptingItemDecorator extends EncryptingItemDecorator
         );
         openssl_public_encrypt($key, $sealedKey, $this->publicKey);
 
-        return [
-            'encrypted' => $cipherText,
-            'cipher' => $this->cipher,
-            'iv' => base64_encode($iv),
-            'signature' => base64_encode($signature),
-            'key' => base64_encode($sealedKey),
-        ];
+        return new EnvelopeEncryptedValue(
+            $cipherText,
+            $this->cipher,
+            $iv,
+            $sealedKey,
+            $signature
+        );
     }
 
-    protected function decrypt($data)
+    protected function decrypt(EncryptedValue $data)
     {
-        openssl_private_decrypt(
-            base64_decode($data['key']),
-            $key,
-            $this->privateKey
-        );
+        openssl_private_decrypt($data->getEnvelopeKey(), $key, $this->privateKey);
 
         return unserialize(openssl_decrypt(
-            $data['encrypted'],
-            $data['cipher'],
+            $data->getCipherText(),
+            $data->getMethod(),
             $key,
             0,
-            base64_decode($data['iv'])
+            $data->getInitializationVector()
         ));
     }
 

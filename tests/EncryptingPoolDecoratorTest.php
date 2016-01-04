@@ -1,12 +1,16 @@
 <?php
 namespace Jeskew\Cache;
 
-use Jeskew\Cache\Fixtures\ArrayCacheItem;
-use Jeskew\Cache\Fixtures\ArrayCachePool;
+use Cache\Adapter\Common\CacheItem;
+use Cache\Adapter\Doctrine\DoctrineCachePool;
+use Cache\IntegrationTests\CachePoolTest;
+use Doctrine\Common\Cache\ArrayCache;
 use Psr\Cache\CacheItemPoolInterface;
 
-abstract class EncryptingPoolDecoratorTest extends \PHPUnit_Framework_TestCase
+abstract class EncryptingPoolDecoratorTest extends CachePoolTest
 {
+    use CacheDataProviderTrait;
+
     /**
      * @var \PHPUnit_Framework_MockObject_MockObject|CacheItemPoolInterface
      */
@@ -17,8 +21,18 @@ abstract class EncryptingPoolDecoratorTest extends \PHPUnit_Framework_TestCase
      */
     protected $instance;
 
+    /** @var CacheItemPoolInterface */
+    private static $persistentCache;
+
+    public static function setUpBeforeClass()
+    {
+        parent::setUpBeforeClass();
+        self::$persistentCache = new DoctrineCachePool(new ArrayCache);
+    }
+
     public function setUp()
     {
+        parent::setUp();
         $this->decorated = $this->getMock(CacheItemPoolInterface::class);
         $this->instance = $this->getInstance($this->decorated);
     }
@@ -45,12 +59,12 @@ abstract class EncryptingPoolDecoratorTest extends \PHPUnit_Framework_TestCase
 
     public function testProxiesGetItemCallsToDecoratedCache()
     {
-        $id = microtime();
+        $id = uniqid(time());
 
         $this->decorated->expects($this->once())
             ->method('getItem')
             ->with($id)
-            ->willReturn(new ArrayCacheItem($id));
+            ->willReturn(new CacheItem($id));
 
         $this->instance->getItem($id);
     }
@@ -63,34 +77,9 @@ abstract class EncryptingPoolDecoratorTest extends \PHPUnit_Framework_TestCase
             ->method('getItems')
             ->with($ids)
             ->willReturn(array_map(function ($id) {
-                return new ArrayCacheItem($id);
+                return new CacheItem($id);
             }, $ids));
 
-        $items = $this->instance->getItems($ids);
-
-        $this->assertCount(count($ids), $items);
-        $this->assertSame($ids, array_values(array_map(function ($item) {
-            return $item->getKey();
-        }, $items)));
-    }
-
-    public function testOnlyProxiesGetItemsCallsForItemsNotAlreadyMemoized()
-    {
-        $ids = [rand(0, 9), rand(10, 19), rand(20, 29)];
-
-        $this->decorated->expects($this->once())
-            ->method('getItem')
-            ->with($ids[0])
-            ->willReturn(new ArrayCacheItem($ids[0]));
-
-        $this->decorated->expects($this->once())
-            ->method('getItems')
-            ->with(array_values(array_intersect_key($ids, [1 => true, 2 => true])))
-            ->willReturn(array_map(function ($id) {
-                return new ArrayCacheItem($id);
-            }, $ids));
-
-        $this->instance->getItem($ids[0]);
         $items = $this->instance->getItems($ids);
 
         $this->assertCount(count($ids), $items);
@@ -101,7 +90,7 @@ abstract class EncryptingPoolDecoratorTest extends \PHPUnit_Framework_TestCase
 
     public function testProxiesDeleteItemCallsToDecoratedCache()
     {
-        $id = microtime();
+        $id = uniqid(time());
 
         $this->decorated->expects($this->once())
             ->method('deleteItem')
@@ -123,58 +112,72 @@ abstract class EncryptingPoolDecoratorTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($this->instance->deleteItems($ids));
     }
 
-    /**
-     * @dataProvider savableDataProvider
-     *
-     * @param mixed $data
-     * @param string $method
-     */
-    public function testEncryptsDataBeforeSavingInDecoratedCache($data, $method)
+    public function testProxiesSaveCallsToDecoratedCache()
     {
-        $id = microtime();
+        $id = uniqid(time());
 
         $this->decorated->expects($this->once())
             ->method('getItem')
             ->with($id)
-            ->willReturn(new ArrayCacheItem($id));
+            ->willReturn(new CacheItem($id));
+
+        /** @var EncryptingItemDecorator $item */
+        $item = $this->instance->getItem($id)->set('value');
 
         $this->decorated->expects($this->once())
-            ->method($method)
-            ->with(
-                $this->callback(function ($arg) use ($data) {
-                    return $arg !== $data;
-                })
-            );
+            ->method('save')
+            ->with($item->getDecorated())
+            ->willReturn(true);
 
-        $this->instance
-            ->{$method}($this->instance->getItem($id)->set($data));
+        $this->instance->save($item);
     }
 
-    public function savableDataProvider()
+    public function testProxiesSaveDeferredCallsToDecoratedCache()
     {
-        return array_merge(
-            array_map(function (array $arr) {
-                return array_merge($arr, ['save']);
-            }, $this->cacheableDataProvider()),
-            array_map(function (array $arr) {
-                return array_merge($arr, ['saveDeferred']);
-            }, $this->cacheableDataProvider())
-        );
+        $id = uniqid(time());
+
+        $this->decorated->expects($this->once())
+            ->method('getItem')
+            ->with($id)
+            ->willReturn(new CacheItem($id));
+
+        /** @var EncryptingItemDecorator $item */
+        $item = $this->instance->getItem($id)->set('value');
+
+        $this->decorated->expects($this->once())
+            ->method('saveDeferred')
+            ->with($item->getDecorated())
+            ->willReturn(true);
+
+        $this->instance->saveDeferred($item);
     }
 
     /**
-     * @dataProvider savableDataProvider
+     * @dataProvider cacheableDataProvider
      *
      * @param mixed $data
-     * @param string $method
      *
      * @expectedException \Psr\Cache\InvalidArgumentException
      */
-    public function testThrowsExceptionWhenUnsavableItemsProvidedToSave($data, $method)
+    public function testValidatesItemsProvidedToSave($data)
     {
-        $item = (new ArrayCacheItem('key'))->set($data);
+        $item = (new CacheItem('key'))->set($data);
 
-        $this->instance->{$method}($item);
+        $this->instance->save($item);
+    }
+
+    /**
+     * @dataProvider cacheableDataProvider
+     *
+     * @param mixed $data
+     *
+     * @expectedException \Psr\Cache\InvalidArgumentException
+     */
+    public function testValidatesItemsProvidedToSaveDeferred($data)
+    {
+        $item = (new CacheItem('key'))->set($data);
+
+        $this->instance->saveDeferred($item);
     }
 
     /**
@@ -184,15 +187,14 @@ abstract class EncryptingPoolDecoratorTest extends \PHPUnit_Framework_TestCase
      */
     public function testDecryptsDataFetchedFromDecoratedCache($data)
     {
-        $decorated = new ArrayCachePool;
-        $instance = $this->getInstance($decorated);
-        $id = microtime();
+        $instance = $this->getInstance(self::$persistentCache);
+        $id = uniqid(time());
 
         $instance->save($instance->getItem($id)->set($data));
 
-        $instance = $this->getInstance($decorated);
+        $instance = $this->getInstance(self::$persistentCache);
 
-        $this->assertNotEquals($data, $decorated->getItem($id)->get());
+        $this->assertNotEquals($data, self::$persistentCache->getItem($id)->get());
         $this->assertEquals($data, $instance->getItem($id)->get());
     }
 
@@ -203,21 +205,20 @@ abstract class EncryptingPoolDecoratorTest extends \PHPUnit_Framework_TestCase
      */
     public function testReturnsNullWhenFetchRetrievesUnencryptedData($data)
     {
-        $decorated = new ArrayCachePool;
-        $instance = $this->getInstance($decorated);
-        $id = microtime();
+        $instance = $this->getInstance(self::$persistentCache);
+        $id = uniqid(time());
 
-        $decorated->save($decorated->getItem($id)->set($data));
+        self::$persistentCache
+            ->save(self::$persistentCache->getItem($id)->set($data));
 
-        $this->assertEquals($data, $decorated->getItem($id)->get());
+        $this->assertEquals($data, self::$persistentCache->getItem($id)->get());
         $this->assertNull($instance->getItem($id)->get());
     }
 
     public function testHasItemReturnsFalseWhenDecoratedCacheHasNoData()
     {
-        $decorated = new ArrayCachePool;
-        $instance = $this->getInstance($decorated);
-        $id = microtime();
+        $instance = $this->getInstance(self::$persistentCache);
+        $id = uniqid(time());
 
         $this->assertFalse($instance->hasItem($id));
     }
@@ -229,29 +230,18 @@ abstract class EncryptingPoolDecoratorTest extends \PHPUnit_Framework_TestCase
      */
     public function testHasItemReturnsFalseWhenKeyHasUnencryptedData($data)
     {
-        $decorated = new ArrayCachePool;
-        $instance = $this->getInstance($decorated);
-        $id = microtime();
+        $instance = $this->getInstance(self::$persistentCache);
+        $id = uniqid(time());
 
-        $decorated->save($decorated->getItem($id)->set($data));
-        $this->assertTrue($decorated->hasItem($id));
+        self::$persistentCache
+            ->save(self::$persistentCache->getItem($id)->set($data));
+        $this->assertTrue(self::$persistentCache->hasItem($id));
         $this->assertFalse($instance->hasItem($id));
     }
 
-    public function cacheableDataProvider()
+    public function createCachePool()
     {
-        return [
-            [1],
-            ['string'],
-            [['key' => 'value']],
-            [['one', 2, 3.0]],
-            [new \ArrayObject()],
-            [[
-                'one' => str_repeat('x', 1024*1024),
-                'two' => str_repeat('y', 1024*1024),
-                'three' => str_repeat('z', 1024*1024),
-            ]],
-        ];
+        return $this->getInstance(self::$persistentCache);
     }
 
     /**

@@ -1,11 +1,13 @@
 <?php
 namespace Jeskew\Cache;
 
-use Jeskew\Cache\Fixtures\ArrayCacheItem;
+use Cache\Adapter\Common\CacheItem;
 use Psr\Cache\CacheItemInterface;
 
 abstract class EncryptingItemDecoratorTest extends \PHPUnit_Framework_TestCase
 {
+    use CacheDataProviderTrait;
+
     public function testProxiesExpiresAtCallsToDecoratedItem()
     {
         $expiry = new \DateTimeImmutable('next Wednesday');
@@ -36,18 +38,36 @@ abstract class EncryptingItemDecoratorTest extends \PHPUnit_Framework_TestCase
 
     public function testAuthenticatesCipherText()
     {
-        $foo = new ArrayCacheItem('foo', true);
+        $foo = new CacheItem('foo');
         $this->getInstance($foo)->set('bar');
         $this->assertTrue($this->getInstance($foo)->isHit());
         $this->assertSame('bar', $this->getInstance($foo)->get());
         $this->assertNotSame('bar', $foo->get());
 
-        $baz = new ArrayCacheItem('baz', true);
+        $baz = new CacheItem('baz');
         $this->getInstance($baz)->set('quux');
 
-        $foo->set(['encrypted' => $baz->get()['encrypted']] + $foo->get());
+        $klass = new \ReflectionClass(EncryptedValue::class);
+        $prop = $klass->getProperty('cipherText');
+        $prop->setAccessible(true);
+        $prop->setValue($foo->get(), $baz->get()->getCipherText());
         $this->assertFalse($this->getInstance($foo)->isHit());
         $this->assertNull($this->getInstance($foo)->get());
+    }
+
+    /**
+     * @dataProvider cacheableDataProvider
+     *
+     * @param mixed $data
+     */
+    public function testEncryptsDataBeforeSavingInDecoratedCache($data)
+    {
+        $id = uniqid(time());
+        $decorated = new CacheItem($id);
+        $this->getInstance($decorated)->set($data);
+
+        $this->assertNotEquals($data, $decorated->get());
+        $this->assertEquals($data, $this->getInstance($decorated)->get());
     }
 
     /**
