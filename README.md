@@ -35,15 +35,37 @@ $encryptedCache = new \Jeskew\Cache\PasswordEncryptingPoolDecorator(
 
 Then use your `$cache` and `$encryptedCache` like you normally would:
 ```php
-$cache->getItem('normal_cache_data')->set('Totally normal!');
+$cache->save($cache->getItem('normal_cache_data')->set('Totally normal!'));
 
-$encryptedCache->getItem('api_keys')->set($keys);
+$encryptedCache->save($encryptedCache->getItem('api_key')->set('super_secret'));
 ```
 
 Though your regular cache and encrypted cache share a storage layer and a
 keyspace, they will not be able to read each other's data. The `$encryptedCache`
 will return `false` for `isHit` if the underlying data is not encrypted, and the
 regular `$cache` will return gibberish if asked to read encrypted data.
+```php
+var_dump($encryptedCache->getItem('api_key')->get());
+// string(12) "super_secret"
+
+var_dump($cache->getItem('api_key')->get());
+// class Jeskew\Cache\PasswordEncryptedValue#177 (4) {
+//     private $mac =>
+//     string(64) <hexits>
+//     private $cipherText =>
+//     string(44) <base64 encoded value>
+//     private $method =>
+//     string(11) "aes-256-cbc"
+//     private $initializationVector =>
+//     string(16) <binary string>
+// }
+
+var_dump($cache->getItem('normal_cache_data')->isHit());
+// bool(true)
+
+var_dump($encryptedCache->getItem('normal_cache_data')->isHit());
+// bool(false)
+```
 
 ## Encrypting your cache with a key pair
 
