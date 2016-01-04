@@ -23,12 +23,12 @@
     },
     "autoload": {
         "psr-4": {
-            "Jeskew\\Cache\\": "src/"
+            "Jsq\\Cache\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Jeskew\\Cache\\": "tests/"
+            "Jsq\\Cache\\": "tests/"
         }
     }
 }

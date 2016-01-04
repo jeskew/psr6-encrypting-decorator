@@ -1,5 +1,5 @@
 <?php
-namespace Jeskew\Cache;
+namespace Jsq\Cache;
 
 use InvalidArgumentException as BaseIAE;
 use Psr\Cache\InvalidArgumentException as CacheIAE;

@@ -1,5 +1,5 @@
 <?php
-namespace Jeskew\Cache;
+namespace Jsq\Cache;
 
 use Psr\Cache\CacheItemInterface;
 
@@ -74,19 +74,17 @@ class EnvelopeEncryptingItemDecorator extends EncryptingItemDecorator
 
     protected function decrypt(EncryptedValue $data)
     {
-        if ($data instanceof EnvelopeEncryptedValue) {
-            openssl_private_decrypt($data->getEnvelopeKey(), $key, $this->privateKey);
+        if (!$data instanceof EnvelopeEncryptedValue) return null;
 
-            return unserialize(openssl_decrypt(
-                $data->getCipherText(),
-                $data->getMethod(),
-                $key,
-                0,
-                $data->getInitializationVector()
-            ));
-        }
+        openssl_private_decrypt($data->getEnvelopeKey(), $key, $this->privateKey);
 
-        return null;
+        return unserialize(openssl_decrypt(
+            $data->getCipherText(),
+            $data->getMethod(),
+            $key,
+            0,
+            $data->getInitializationVector()
+        ));
     }
 
     private function setPublicKey($cert)

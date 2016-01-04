@@ -1,5 +1,5 @@
 <?php
-namespace Jeskew\Cache;
+namespace Jsq\Cache;
 
 use Cache\Adapter\Common\CacheItem;
 use Psr\Cache\CacheItemInterface;

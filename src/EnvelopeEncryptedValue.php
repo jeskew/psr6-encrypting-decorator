@@ -1,5 +1,5 @@
 <?php
-namespace Jeskew\Cache;
+namespace Jsq\Cache;
 
 class EnvelopeEncryptedValue extends EncryptedValue
 {

@@ -26,7 +26,7 @@ a pass phrase and one that does so with a key pair.
 First, create your PSR-6 cache as you normally would, then wrap your cache with
 an encrypting decorator:
 ```php
-$encryptedCache = new \Jeskew\Cache\PasswordEncryptingPoolDecorator(
+$encryptedCache = new \Jsq\Cache\PasswordEncryptingPoolDecorator(
     $cache, // an instance of \Psr\Cache\CacheItemPoolInterface
     $password,
     $cipher // optional, defaults to 'aes-256-cbc'
@@ -49,7 +49,7 @@ var_dump($encryptedCache->getItem('api_key')->get());
 // string(12) "super_secret"
 
 var_dump($cache->getItem('api_key')->get());
-// class Jeskew\Cache\PasswordEncryptedValue#177 (4) {
+// class Jsq\Cache\PasswordEncryptedValue#177 (4) {
 //     private $mac =>
 //     string(64) <hexits>
 //     private $cipherText =>
@@ -73,7 +73,7 @@ If you'd rather not rely on a shared password, the `EnvelopeEncryptionPoolDecora
 can secure your sensitive cache entries using a public/private key pair.
 
 ```php
-$encryptedCache = new \Jeskew\Cache\EnvelopeEncryptionPoolDecorator(
+$encryptedCache = new \Jsq\Cache\EnvelopeEncryptionPoolDecorator(
     $cache,
     'file:///path/to/certificate.pem',
     'file:///path/to/private/key.pem',
