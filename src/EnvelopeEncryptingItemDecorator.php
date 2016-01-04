@@ -5,9 +5,10 @@ use Psr\Cache\CacheItemInterface;
 
 class EnvelopeEncryptingItemDecorator extends EncryptingItemDecorator
 {
+    /** @var resource */
     private $publicKey;
+    /** @var resource */
     private $privateKey;
-    private $cipher;
 
     public function __construct(
         CacheItemInterface $decorated,
@@ -16,8 +17,7 @@ class EnvelopeEncryptingItemDecorator extends EncryptingItemDecorator
         $passPhrase,
         $cipher
     ) {
-        parent::__construct($decorated);
-        $this->cipher = $cipher;
+        parent::__construct($decorated, $cipher);
         $this->setPublicKey($certificate);
         $this->setPrivateKey($key, $passPhrase);
     }
@@ -33,42 +33,24 @@ class EnvelopeEncryptingItemDecorator extends EncryptingItemDecorator
         $data = $this->getDecorated()->get();
 
         return $data instanceof EnvelopeEncryptedValue
-            && openssl_verify(
+            && $this->validateSignature(
                 $this->getKey() . $data->getCipherText(),
-                $data->getSignature(),
-                $this->publicKey
+                $data->getSignature()
             );
     }
 
     protected function encrypt($data)
     {
-        $key = openssl_random_pseudo_bytes(
-            openssl_cipher_iv_length($this->cipher)
-        );
-        $iv = openssl_random_pseudo_bytes(
-            openssl_cipher_iv_length($this->cipher)
-        );
-        $cipherText = openssl_encrypt(
-            serialize($data),
-            $this->cipher,
-            $key,
-            0,
-            $iv
-        );
-
-        openssl_sign(
-            $this->getKey() . $cipherText,
-            $signature,
-            $this->privateKey
-        );
-        openssl_public_encrypt($key, $sealedKey, $this->publicKey);
+        $key = $this->generateIv();
+        $iv = $this->generateIv();
+        $cipherText = $this->encryptString(serialize($data), $key, $iv);
 
         return new EnvelopeEncryptedValue(
             $cipherText,
-            $this->cipher,
+            $this->getCipherMethod(),
             $iv,
-            $sealedKey,
-            $signature
+            $this->encryptEnvelopeKey($key),
+            $this->signString($this->getKey() . $cipherText)
         );
     }
 
@@ -76,13 +58,10 @@ class EnvelopeEncryptingItemDecorator extends EncryptingItemDecorator
     {
         if (!$data instanceof EnvelopeEncryptedValue) return null;
 
-        openssl_private_decrypt($data->getEnvelopeKey(), $key, $this->privateKey);
-
-        return unserialize(openssl_decrypt(
+        return unserialize($this->decryptString(
             $data->getCipherText(),
             $data->getMethod(),
-            $key,
-            0,
+            $this->decryptEnvelopeKey($data->getEnvelopeKey()),
             $data->getInitializationVector()
         ));
     }
@@ -113,5 +92,31 @@ class EnvelopeEncryptingItemDecorator extends EncryptingItemDecorator
     private function validateOpenSslKey($key)
     {
         return is_resource($key) && 'OpenSSL key' === get_resource_type($key);
+    }
+
+    private function signString($string)
+    {
+        openssl_sign($string, $signature, $this->privateKey);
+
+        return $signature;
+    }
+
+    private function validateSignature($signed, $signature)
+    {
+        return openssl_verify($signed, $signature, $this->publicKey);
+    }
+
+    private function encryptEnvelopeKey($key)
+    {
+        openssl_public_encrypt($key, $sealedKey, $this->publicKey);
+
+        return $sealedKey;
+    }
+
+    private function decryptEnvelopeKey($sealedKey)
+    {
+        openssl_private_decrypt($sealedKey, $key, $this->privateKey);
+
+        return $key;
     }
 }

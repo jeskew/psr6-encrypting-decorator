@@ -9,10 +9,13 @@ abstract class EncryptingItemDecorator implements CacheItemInterface
     private $decorated;
     /** @var mixed */
     private $decrypted;
+    /** @var string */
+    private $cipher;
 
-    public function __construct(CacheItemInterface $decorated)
+    public function __construct(CacheItemInterface $decorated, $cipher)
     {
         $this->decorated = $decorated;
+        $this->cipher = $cipher;
     }
 
     public function getKey()
@@ -67,4 +70,26 @@ abstract class EncryptingItemDecorator implements CacheItemInterface
     abstract protected function decrypt(EncryptedValue $data);
 
     abstract protected function isDecryptable();
+
+    protected function getCipherMethod()
+    {
+        return $this->cipher;
+    }
+
+    protected function generateIv()
+    {
+        return openssl_random_pseudo_bytes(
+            openssl_cipher_iv_length($this->cipher)
+        );
+    }
+
+    protected function encryptString($string, $key, $iv)
+    {
+        return openssl_encrypt($string, $this->cipher, $key, 0, $iv);
+    }
+
+    protected function decryptString($string, $method, $key, $iv)
+    {
+        return openssl_decrypt($string, $method, $key, 0, $iv);
+    }
 }

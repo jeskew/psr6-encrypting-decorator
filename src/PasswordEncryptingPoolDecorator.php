@@ -11,6 +11,11 @@ class PasswordEncryptingPoolDecorator extends EncryptingPoolDecorator
     /** @var string */
     private $cipher;
 
+    /**
+     * @param CacheItemPoolInterface $decorated
+     * @param string $password
+     * @param string $cipher
+     */
     public function __construct(
         CacheItemPoolInterface $decorated,
         $password,

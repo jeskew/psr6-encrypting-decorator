@@ -7,14 +7,11 @@ class PasswordEncryptingItemDecorator extends EncryptingItemDecorator
 {
     /** @var string */
     private $password;
-    /** @var string */
-    private $cipher;
 
     public function __construct(CacheItemInterface $decorated, $pass, $cipher)
     {
-        parent::__construct($decorated);
+        parent::__construct($decorated, $cipher);
         $this->password = $pass;
-        $this->cipher = $cipher;
     }
 
     protected function isDecryptable()
@@ -30,20 +27,12 @@ class PasswordEncryptingItemDecorator extends EncryptingItemDecorator
 
     protected function encrypt($data)
     {
-        $iv = openssl_random_pseudo_bytes(
-            openssl_cipher_iv_length($this->cipher)
-        );
-        $encrypted = openssl_encrypt(
-            serialize($data),
-            $this->cipher,
-            $this->password,
-            0,
-            $iv
-        );
+        $iv = $this->generateIv();
+        $encrypted = $this->encryptString(serialize($data), $this->password, $iv);
 
         return new PasswordEncryptedValue(
             $encrypted,
-            $this->cipher,
+            $this->getCipherMethod(),
             $iv,
             $this->authenticate($this->getKey(), $encrypted)
         );
@@ -51,21 +40,21 @@ class PasswordEncryptingItemDecorator extends EncryptingItemDecorator
 
     protected function decrypt(EncryptedValue $data)
     {
-        return unserialize(openssl_decrypt(
+        return unserialize($this->decryptString(
             $data->getCipherText(),
             $data->getMethod(),
             $this->password,
-            0,
             $data->getInitializationVector()
         ));
     }
 
     private function authenticate($key, $cipherText)
     {
-        return hash_hmac(
-            'sha256',
-            $cipherText,
-            hash_hmac('sha256', $key, $this->password)
-        );
+        return $this->hmac($cipherText, $this->hmac($key, $this->password));
+    }
+
+    private function hmac($data, $key)
+    {
+        return hash_hmac('sha256', $data, $key);
     }
 }
