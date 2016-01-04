@@ -3,8 +3,8 @@
 [![Build Status](https://travis-ci.org/jeskew/psr6-encrypting-decorator.svg?branch=master)](https://travis-ci.org/jeskew/psr6-encrypting-decorator)
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/jeskew/psr6-encrypting-decorator/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/jeskew/psr6-encrypting-decorator/?branch=master)
 [![Code Coverage](https://scrutinizer-ci.com/g/jeskew/psr6-encrypting-decorator/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/jeskew/psr6-encrypting-decorator/?branch=master)
-[![Apache 2 License](https://img.shields.io/packagist/l/jeskew/psr6-encrypting-decorator.svg?style=flat)](https://www.apache.org/licenses/LICENSE-2.0.html)
-[![Total Downloads](https://img.shields.io/packagist/dt/jeskew/psr6-encrypting-decorator.svg?style=flat)](https://packagist.org/packages/jeskew/psr6-encrypting-decorator)
+[![Apache 2 License](https://img.shields.io/packagist/l/jsq/psr6-encrypting-decorator.svg?style=flat)](https://www.apache.org/licenses/LICENSE-2.0.html)
+[![Total Downloads](https://img.shields.io/packagist/dt/jsq/psr6-encrypting-decorator.svg?style=flat)](https://packagist.org/packages/jsq/psr6-encrypting-decorator)
 [![Author](http://img.shields.io/badge/author-@jreskew-blue.svg?style=flat-square)](https://twitter.com/jreskew)
 
 Having to encrypt your data at rest shouldn't keep you from using the open-source
