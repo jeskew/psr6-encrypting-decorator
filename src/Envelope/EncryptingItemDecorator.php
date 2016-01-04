@@ -1,9 +1,12 @@
 <?php
-namespace Jsq\Cache;
+namespace Jsq\Cache\Envelope;
 
+use Jsq\Cache\EncryptedValue as BaseEncryptedValue;
+use Jsq\Cache\EncryptingItemDecorator as BaseItemDecorator;
+use Jsq\Cache\InvalidArgumentException;
 use Psr\Cache\CacheItemInterface;
 
-class EnvelopeEncryptingItemDecorator extends EncryptingItemDecorator
+class EncryptingItemDecorator extends BaseItemDecorator
 {
     /** @var resource */
     private $publicKey;
@@ -32,7 +35,7 @@ class EnvelopeEncryptingItemDecorator extends EncryptingItemDecorator
     {
         $data = $this->getDecorated()->get();
 
-        return $data instanceof EnvelopeEncryptedValue
+        return $data instanceof EncryptedValue
             && $this->validateSignature(
                 $this->getKey() . $data->getCipherText(),
                 $data->getSignature()
@@ -45,7 +48,7 @@ class EnvelopeEncryptingItemDecorator extends EncryptingItemDecorator
         $iv = $this->generateIv();
         $cipherText = $this->encryptString(serialize($data), $key, $iv);
 
-        return new EnvelopeEncryptedValue(
+        return new EncryptedValue(
             $cipherText,
             $this->getCipherMethod(),
             $iv,
@@ -54,9 +57,9 @@ class EnvelopeEncryptingItemDecorator extends EncryptingItemDecorator
         );
     }
 
-    protected function decrypt(EncryptedValue $data)
+    protected function decrypt(BaseEncryptedValue $data)
     {
-        if (!$data instanceof EnvelopeEncryptedValue) return null;
+        if (!$data instanceof EncryptedValue) return null;
 
         return unserialize($this->decryptString(
             $data->getCipherText(),

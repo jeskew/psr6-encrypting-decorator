@@ -1,5 +1,5 @@
 {
-    "name": "jeskew/psr6-encrypting-decorator",
+    "name": "jsq/psr6-encrypting-decorator",
     "description": "For when policy or paranoia prevent you from leaving sensitive cache entries unencrypted at rest.",
     "minimum-stability": "stable",
     "license": "Apache-2.0",

@@ -1,7 +1,9 @@
 <?php
-namespace Jsq\Cache;
+namespace Jsq\Cache\Envelope;
 
-class EnvelopeEncryptedValue extends EncryptedValue
+use Jsq\Cache\EncryptedValue as BaseEncryptedValue;
+
+class EncryptedValue extends BaseEncryptedValue
 {
     /** @var string */
     private $envelopeKey;

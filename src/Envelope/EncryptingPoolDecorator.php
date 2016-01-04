@@ -1,10 +1,11 @@
 <?php
-namespace Jsq\Cache;
+namespace Jsq\Cache\Envelope;
 
+use Jsq\Cache\EncryptingPoolDecorator as BasePoolDecorator;
 use Psr\Cache\CacheItemInterface;
 use Psr\Cache\CacheItemPoolInterface;
 
-class EnvelopeEncryptingPoolDecorator extends EncryptingPoolDecorator
+class EncryptingPoolDecorator extends BasePoolDecorator
 {
     /** @var resource|string */
     private $certificate;
@@ -40,7 +41,7 @@ class EnvelopeEncryptingPoolDecorator extends EncryptingPoolDecorator
 
     protected function decorate(CacheItemInterface $inner)
     {
-        return new EnvelopeEncryptingItemDecorator(
+        return new EncryptingItemDecorator(
             $inner,
             $this->certificate,
             $this->key,

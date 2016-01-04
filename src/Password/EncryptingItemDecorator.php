@@ -1,9 +1,11 @@
 <?php
-namespace Jsq\Cache;
+namespace Jsq\Cache\Password;
 
+use Jsq\Cache\EncryptedValue as BaseEncryptedValue;
+use Jsq\Cache\EncryptingItemDecorator as BaseItemDecorator;
 use Psr\Cache\CacheItemInterface;
 
-class PasswordEncryptingItemDecorator extends EncryptingItemDecorator
+class EncryptingItemDecorator extends BaseItemDecorator
 {
     /** @var string */
     private $password;
@@ -18,7 +20,7 @@ class PasswordEncryptingItemDecorator extends EncryptingItemDecorator
     {
         $data = $this->getDecorated()->get();
 
-        return $data instanceof PasswordEncryptedValue
+        return $data instanceof EncryptedValue
             && $data->getMac() === $this->authenticate(
                 $this->getKey(),
                 $data->getCipherText()
@@ -30,7 +32,7 @@ class PasswordEncryptingItemDecorator extends EncryptingItemDecorator
         $iv = $this->generateIv();
         $encrypted = $this->encryptString(serialize($data), $this->password, $iv);
 
-        return new PasswordEncryptedValue(
+        return new EncryptedValue(
             $encrypted,
             $this->getCipherMethod(),
             $iv,
@@ -38,7 +40,7 @@ class PasswordEncryptingItemDecorator extends EncryptingItemDecorator
         );
     }
 
-    protected function decrypt(EncryptedValue $data)
+    protected function decrypt(BaseEncryptedValue $data)
     {
         return unserialize($this->decryptString(
             $data->getCipherText(),

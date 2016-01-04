@@ -1,7 +1,9 @@
 <?php
-namespace Jsq\Cache;
+namespace Jsq\Cache\Password;
 
-class PasswordEncryptedValue extends EncryptedValue
+use Jsq\Cache\EncryptedValue as BaseEncryptedValue;
+
+class EncryptedValue extends BaseEncryptedValue
 {
     /** @var string */
     private $mac;

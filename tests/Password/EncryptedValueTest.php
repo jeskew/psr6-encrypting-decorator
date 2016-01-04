@@ -1,7 +1,7 @@
 <?php
-namespace Jsq\Cache;
+namespace Jsq\Cache\Password;
 
-class PasswordEncryptedValueTest extends \PHPUnit_Framework_TestCase
+class EncryptedValueTest extends \PHPUnit_Framework_TestCase
 {
     public function testCanSurviveSerialization()
     {
@@ -11,7 +11,7 @@ class PasswordEncryptedValueTest extends \PHPUnit_Framework_TestCase
         $plaintext = 'The sparrow flies at midnight';
         $cipherText = openssl_encrypt($plaintext, $method, $password, 0, $iv);
         $mac = hash('sha256', $cipherText);
-        $item = new PasswordEncryptedValue($cipherText, $method, $iv, $mac);
+        $item = new EncryptedValue($cipherText, $method, $iv, $mac);
 
         $this->assertEquals($item, unserialize(serialize($item)));
     }

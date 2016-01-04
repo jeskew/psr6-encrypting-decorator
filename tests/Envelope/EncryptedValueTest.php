@@ -1,7 +1,9 @@
 <?php
-namespace Jsq\Cache;
+namespace Jsq\Cache\Envelope;
 
-class EnvelopeEncryptedValueTest extends \PHPUnit_Framework_TestCase
+use Jsq\Cache\PkiUtils;
+
+class EncryptedValueTest extends \PHPUnit_Framework_TestCase
 {
     use PkiUtils;
 
@@ -19,7 +21,7 @@ class EnvelopeEncryptedValueTest extends \PHPUnit_Framework_TestCase
         openssl_sign($cipherText, $signature, $privateKey);
         openssl_public_encrypt($password, $sealedKey, $publicKey);
 
-        $item = new EnvelopeEncryptedValue($cipherText, $method, $iv, $sealedKey, $signature);
+        $item = new EncryptedValue($cipherText, $method, $iv, $sealedKey, $signature);
 
         $this->assertEquals($item, unserialize(serialize($item)));
     }
