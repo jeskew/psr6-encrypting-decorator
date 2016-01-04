@@ -1,5 +1,5 @@
 <?php
-namespace Jsq\Cache;
+namespace Jsq\CacheEncryption;
 
 use InvalidArgumentException as BaseIAE;
 use Psr\Cache\InvalidArgumentException as CacheIAE;

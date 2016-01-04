@@ -1,7 +1,7 @@
 <?php
-namespace Jsq\Cache\Envelope;
+namespace Jsq\CacheEncryption\Envelope;
 
-use Jsq\Cache\PkiUtils;
+use Jsq\CacheEncryption\PkiUtils;
 
 class EncryptedValueTest extends \PHPUnit_Framework_TestCase
 {

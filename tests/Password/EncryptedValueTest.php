@@ -1,5 +1,5 @@
 <?php
-namespace Jsq\Cache\Password;
+namespace Jsq\CacheEncryption\Password;
 
 class EncryptedValueTest extends \PHPUnit_Framework_TestCase
 {

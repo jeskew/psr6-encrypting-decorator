@@ -1,7 +1,7 @@
 <?php
-namespace Jsq\Cache\Envelope;
+namespace Jsq\CacheEncryption\Envelope;
 
-use Jsq\Cache\EncryptedValue as BaseEncryptedValue;
+use Jsq\CacheEncryption\EncryptedValue as BaseEncryptedValue;
 
 class EncryptedValue extends BaseEncryptedValue
 {

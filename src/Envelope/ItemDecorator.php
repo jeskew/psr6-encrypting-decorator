@@ -1,12 +1,12 @@
 <?php
-namespace Jsq\Cache\Envelope;
+namespace Jsq\CacheEncryption\Envelope;
 
-use Jsq\Cache\EncryptedValue as BaseEncryptedValue;
-use Jsq\Cache\EncryptingItemDecorator as BaseItemDecorator;
-use Jsq\Cache\InvalidArgumentException;
+use Jsq\CacheEncryption\EncryptedValue as BaseEncryptedValue;
+use Jsq\CacheEncryption\ItemDecorator as BaseItemDecorator;
+use Jsq\CacheEncryption\InvalidArgumentException;
 use Psr\Cache\CacheItemInterface;
 
-class EncryptingItemDecorator extends BaseItemDecorator
+class ItemDecorator extends BaseItemDecorator
 {
     /** @var resource */
     private $publicKey;

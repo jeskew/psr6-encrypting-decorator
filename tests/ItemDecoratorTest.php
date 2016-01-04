@@ -1,10 +1,10 @@
 <?php
-namespace Jsq\Cache;
+namespace Jsq\CacheEncryption;
 
 use Cache\Adapter\Common\CacheItem;
 use Psr\Cache\CacheItemInterface;
 
-abstract class EncryptingItemDecoratorTest extends \PHPUnit_Framework_TestCase
+abstract class ItemDecoratorTest extends \PHPUnit_Framework_TestCase
 {
     use CacheDataProviderTrait;
 
@@ -72,7 +72,7 @@ abstract class EncryptingItemDecoratorTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @param CacheItemInterface $decorated
-     * @return EncryptingItemDecorator
+     * @return ItemDecorator
      */
     abstract protected function getInstance(CacheItemInterface $decorated);
 }

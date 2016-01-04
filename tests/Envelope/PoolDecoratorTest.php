@@ -1,17 +1,17 @@
 <?php
-namespace Jsq\Cache\Envelope;
+namespace Jsq\CacheEncryption\Envelope;
 
-use Jsq\Cache\EncryptingPoolDecoratorTest as BasePoolDecoratorTest;
-use Jsq\Cache\PkiUtils;
+use Jsq\CacheEncryption\PoolDecoratorTest as BasePoolDecoratorTest;
+use Jsq\CacheEncryption\PkiUtils;
 use Psr\Cache\CacheItemPoolInterface;
 
-class EncryptingPoolDecoratorTest extends BasePoolDecoratorTest
+class PoolDecoratorTest extends BasePoolDecoratorTest
 {
     use PkiUtils;
 
     protected function getInstance(CacheItemPoolInterface $decorated)
     {
-        return new EncryptingPoolDecorator(
+        return new PoolDecorator(
             $decorated,
             self::getCertificate(),
             self::getKey()

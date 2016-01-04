@@ -1,13 +1,13 @@
 <?php
-namespace Jsq\Cache\Envelope;
+namespace Jsq\CacheEncryption\Envelope;
 
 use Cache\Adapter\Common\CacheItem;
-use Jsq\Cache\EncryptingItemDecoratorTest as BaseItemDecoratorTest;
-use Jsq\Cache\PkiUtils;
+use Jsq\CacheEncryption\ItemDecoratorTest as BaseItemDecoratorTest;
+use Jsq\CacheEncryption\PkiUtils;
 use Psr\Cache\CacheItemInterface;
 use Psr\Cache\InvalidArgumentException;
 
-class EncryptingItemDecoratorTest extends BaseItemDecoratorTest
+class ItemDecoratorTest extends BaseItemDecoratorTest
 {
     use PkiUtils;
 
@@ -21,7 +21,7 @@ class EncryptingItemDecoratorTest extends BaseItemDecoratorTest
      */
     public function testVerifiesCertificateAndKey($cert, $key)
     {
-        new EncryptingItemDecorator(
+        new ItemDecorator(
             new CacheItem('key'),
             $cert,
             $key,
@@ -41,7 +41,7 @@ class EncryptingItemDecoratorTest extends BaseItemDecoratorTest
 
     protected function getInstance(CacheItemInterface $decorated)
     {
-        return new EncryptingItemDecorator(
+        return new ItemDecorator(
             $decorated,
             self::getCertificate(),
             self::getKey(),

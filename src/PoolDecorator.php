@@ -1,10 +1,10 @@
 <?php
-namespace Jsq\Cache;
+namespace Jsq\CacheEncryption;
 
 use Psr\Cache\CacheItemInterface;
 use Psr\Cache\CacheItemPoolInterface;
 
-abstract class EncryptingPoolDecorator implements CacheItemPoolInterface
+abstract class PoolDecorator implements CacheItemPoolInterface
 {
     /** @var CacheItemPoolInterface */
     private $decorated;
@@ -58,7 +58,7 @@ abstract class EncryptingPoolDecorator implements CacheItemPoolInterface
 
     private function proxySave(CacheItemInterface $item, $deferred = false)
     {
-        if ($item instanceof EncryptingItemDecorator) {
+        if ($item instanceof ItemDecorator) {
             return $this->decorated
                 ->{$deferred ? 'saveDeferred' : 'save'}($item->getDecorated());
         }

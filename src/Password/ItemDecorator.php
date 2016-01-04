@@ -1,11 +1,11 @@
 <?php
-namespace Jsq\Cache\Password;
+namespace Jsq\CacheEncryption\Password;
 
-use Jsq\Cache\EncryptedValue as BaseEncryptedValue;
-use Jsq\Cache\EncryptingItemDecorator as BaseItemDecorator;
+use Jsq\CacheEncryption\EncryptedValue as BaseEncryptedValue;
+use Jsq\CacheEncryption\ItemDecorator as BaseItemDecorator;
 use Psr\Cache\CacheItemInterface;
 
-class EncryptingItemDecorator extends BaseItemDecorator
+class ItemDecorator extends BaseItemDecorator
 {
     /** @var string */
     private $password;

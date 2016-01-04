@@ -1,5 +1,5 @@
 <?php
-namespace Jsq\Cache;
+namespace Jsq\CacheEncryption;
 
 trait CacheDataProviderTrait
 {

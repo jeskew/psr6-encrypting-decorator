@@ -23,12 +23,12 @@
     },
     "autoload": {
         "psr-4": {
-            "Jsq\\Cache\\": "src/"
+            "Jsq\\CacheEncryption\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Jsq\\Cache\\": "tests/"
+            "Jsq\\CacheEncryption\\": "tests/"
         }
     }
 }

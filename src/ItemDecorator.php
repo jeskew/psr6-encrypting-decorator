@@ -1,9 +1,9 @@
 <?php
-namespace Jsq\Cache;
+namespace Jsq\CacheEncryption;
 
 use Psr\Cache\CacheItemInterface;
 
-abstract class EncryptingItemDecorator implements CacheItemInterface
+abstract class ItemDecorator implements CacheItemInterface
 {
     /** @var CacheItemInterface */
     private $decorated;

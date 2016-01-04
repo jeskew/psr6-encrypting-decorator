@@ -1,5 +1,5 @@
 <?php
-namespace Jsq\Cache;
+namespace Jsq\CacheEncryption;
 
 use Cache\Adapter\Common\CacheItem;
 use Cache\Adapter\Doctrine\DoctrineCachePool;
@@ -7,7 +7,7 @@ use Cache\IntegrationTests\CachePoolTest;
 use Doctrine\Common\Cache\ArrayCache;
 use Psr\Cache\CacheItemPoolInterface;
 
-abstract class EncryptingPoolDecoratorTest extends CachePoolTest
+abstract class PoolDecoratorTest extends CachePoolTest
 {
     use CacheDataProviderTrait;
 
@@ -17,7 +17,7 @@ abstract class EncryptingPoolDecoratorTest extends CachePoolTest
     protected $decorated;
 
     /**
-     * @var EncryptingPoolDecorator
+     * @var PoolDecorator
      */
     protected $instance;
 
@@ -121,7 +121,7 @@ abstract class EncryptingPoolDecoratorTest extends CachePoolTest
             ->with($id)
             ->willReturn(new CacheItem($id));
 
-        /** @var EncryptingItemDecorator $item */
+        /** @var ItemDecorator $item */
         $item = $this->instance->getItem($id)->set('value');
 
         $this->decorated->expects($this->once())
@@ -141,7 +141,7 @@ abstract class EncryptingPoolDecoratorTest extends CachePoolTest
             ->with($id)
             ->willReturn(new CacheItem($id));
 
-        /** @var EncryptingItemDecorator $item */
+        /** @var ItemDecorator $item */
         $item = $this->instance->getItem($id)->set('value');
 
         $this->decorated->expects($this->once())
@@ -246,7 +246,7 @@ abstract class EncryptingPoolDecoratorTest extends CachePoolTest
 
     /**
      * @param CacheItemPoolInterface $decorated
-     * @return EncryptingPoolDecorator
+     * @return PoolDecorator
      */
     abstract protected function getInstance(CacheItemPoolInterface $decorated);
 }

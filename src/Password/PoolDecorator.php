@@ -1,11 +1,11 @@
 <?php
-namespace Jsq\Cache\Password;
+namespace Jsq\CacheEncryption\Password;
 
-use Jsq\Cache\EncryptingPoolDecorator as BasePoolDecorator;
+use Jsq\CacheEncryption\PoolDecorator as BasePoolDecorator;
 use Psr\Cache\CacheItemInterface;
 use Psr\Cache\CacheItemPoolInterface;
 
-class EncryptingPoolDecorator extends BasePoolDecorator
+class PoolDecorator extends BasePoolDecorator
 {
     /** @var string */
     private $password;
@@ -29,7 +29,7 @@ class EncryptingPoolDecorator extends BasePoolDecorator
 
     protected function decorate(CacheItemInterface $item)
     {
-        return new EncryptingItemDecorator(
+        return new ItemDecorator(
             $item,
             $this->password,
             $this->cipher
