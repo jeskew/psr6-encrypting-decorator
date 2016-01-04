@@ -74,15 +74,19 @@ class EnvelopeEncryptingItemDecorator extends EncryptingItemDecorator
 
     protected function decrypt(EncryptedValue $data)
     {
-        openssl_private_decrypt($data->getEnvelopeKey(), $key, $this->privateKey);
+        if ($data instanceof EnvelopeEncryptedValue) {
+            openssl_private_decrypt($data->getEnvelopeKey(), $key, $this->privateKey);
 
-        return unserialize(openssl_decrypt(
-            $data->getCipherText(),
-            $data->getMethod(),
-            $key,
-            0,
-            $data->getInitializationVector()
-        ));
+            return unserialize(openssl_decrypt(
+                $data->getCipherText(),
+                $data->getMethod(),
+                $key,
+                0,
+                $data->getInitializationVector()
+            ));
+        }
+
+        return null;
     }
 
     private function setPublicKey($cert)

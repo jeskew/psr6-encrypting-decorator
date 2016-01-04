@@ -29,9 +29,4 @@ class PasswordEncryptingPoolDecorator extends EncryptingPoolDecorator
             $this->cipher
         );
     }
-
-    protected function validateEncryption(CacheItemInterface $item)
-    {
-        return $item instanceof PasswordEncryptingItemDecorator;
-    }
 }

@@ -48,18 +48,19 @@ abstract class EncryptingPoolDecorator implements CacheItemPoolInterface
 
     public function save(CacheItemInterface $item)
     {
-        if ($this->validateEncryption($item)) {
-            return $this->decorated->save($item->getDecorated());
-        }
-
-        throw new InvalidArgumentException('The provided cache item cannot'
-            . ' be saved, as it did not originate from this cache.');
+        return $this->proxySave($item);
     }
 
     public function saveDeferred(CacheItemInterface $item)
     {
-        if ($this->validateEncryption($item)) {
-            return $this->decorated->saveDeferred($item->getDecorated());
+        return $this->proxySave($item, true);
+    }
+
+    private function proxySave(CacheItemInterface $item, $deferred = false)
+    {
+        if ($item instanceof EncryptingItemDecorator) {
+            return $this->decorated
+                ->{$deferred ? 'saveDeferred' : 'save'}($item->getDecorated());
         }
 
         throw new InvalidArgumentException('The provided cache item cannot'
@@ -72,6 +73,4 @@ abstract class EncryptingPoolDecorator implements CacheItemPoolInterface
     }
 
     abstract protected function decorate(CacheItemInterface $inner);
-
-    abstract protected function validateEncryption(CacheItemInterface $item);
 }
