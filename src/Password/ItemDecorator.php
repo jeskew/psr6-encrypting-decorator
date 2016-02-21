@@ -1,18 +1,21 @@
 <?php
 namespace Jsq\CacheEncryption\Password;
 
-use Jsq\CacheEncryption\EncryptedValue as BaseEncryptedValue;
 use Jsq\CacheEncryption\ItemDecorator as BaseItemDecorator;
+use Jsq\CacheEncryption\OpenSslEncryptionTrait;
 use Psr\Cache\CacheItemInterface;
 
 class ItemDecorator extends BaseItemDecorator
 {
+    use OpenSslEncryptionTrait;
+
     /** @var string */
     private $password;
 
     public function __construct(CacheItemInterface $decorated, $pass, $cipher)
     {
-        parent::__construct($decorated, $cipher);
+        parent::__construct($decorated);
+        $this->cipher = $cipher;
         $this->password = $pass;
     }
 
@@ -40,8 +43,10 @@ class ItemDecorator extends BaseItemDecorator
         );
     }
 
-    protected function decrypt(BaseEncryptedValue $data)
+    protected function decrypt($data)
     {
+        if (!$data instanceof EncryptedValue) return null;
+
         return unserialize($this->decryptString(
             $data->getCipherText(),
             $data->getMethod(),
