@@ -1,13 +1,15 @@
 <?php
 namespace Jsq\CacheEncryption\Envelope;
 
-use Jsq\CacheEncryption\EncryptedValue as BaseEncryptedValue;
 use Jsq\CacheEncryption\ItemDecorator as BaseItemDecorator;
 use Jsq\CacheEncryption\InvalidArgumentException;
+use Jsq\CacheEncryption\OpenSslEncryptionTrait;
 use Psr\Cache\CacheItemInterface;
 
 class ItemDecorator extends BaseItemDecorator
 {
+    use OpenSslEncryptionTrait;
+
     /** @var resource */
     private $publicKey;
     /** @var resource */
@@ -20,7 +22,8 @@ class ItemDecorator extends BaseItemDecorator
         $passPhrase,
         $cipher
     ) {
-        parent::__construct($decorated, $cipher);
+        parent::__construct($decorated);
+        $this->cipher = $cipher;
         $this->setPublicKey($certificate);
         $this->setPrivateKey($key, $passPhrase);
     }
@@ -57,7 +60,7 @@ class ItemDecorator extends BaseItemDecorator
         );
     }
 
-    protected function decrypt(BaseEncryptedValue $data)
+    protected function decrypt($data)
     {
         if (!$data instanceof EncryptedValue) return null;
 

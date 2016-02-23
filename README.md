@@ -87,3 +87,12 @@ certificate file (the path must be prefaced with `file://`), or a PEM-encoded
 certificate string. The private key can be a path to a PEM-encoded private key
 file (the path must be prefaced with `file://`), or a PEM-encoded certificate
 string.
+
+## Encrypting your cache as Iron tokens
+
+This library also supports encryption compatible with the
+[Iron](https://github.com/hueniverse/iron) library. This can be useful if you
+would like to share a cache between multiple applications, even ones written in
+different languages. The Iron specification details how to seal JSON objects, so
+the Iron decorator will encode data passed to it as JSON before encrypting it.
+Decrypted items will be returned as arrays.
