@@ -3,13 +3,10 @@ namespace Jsq\CacheEncryption\Envelope;
 
 use Jsq\CacheEncryption\ItemDecorator as BaseItemDecorator;
 use Jsq\CacheEncryption\InvalidArgumentException;
-use Jsq\CacheEncryption\OpenSslEncryptionTrait;
 use Psr\Cache\CacheItemInterface;
 
 class ItemDecorator extends BaseItemDecorator
 {
-    use OpenSslEncryptionTrait;
-
     /** @var resource */
     private $publicKey;
     /** @var resource */
@@ -22,8 +19,7 @@ class ItemDecorator extends BaseItemDecorator
         $passPhrase,
         $cipher
     ) {
-        parent::__construct($decorated);
-        $this->cipher = $cipher;
+        parent::__construct($cipher, $decorated);
         $this->setPublicKey($certificate);
         $this->setPrivateKey($key, $passPhrase);
     }

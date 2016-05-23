@@ -2,21 +2,20 @@
 namespace Jsq\CacheEncryption\Password;
 
 use Jsq\CacheEncryption\ItemDecorator as BaseItemDecorator;
-use Jsq\CacheEncryption\OpenSslEncryptionTrait;
 use Psr\Cache\CacheItemInterface;
 
 class ItemDecorator extends BaseItemDecorator
 {
-    use OpenSslEncryptionTrait;
-
     /** @var string */
     private $password;
 
-    public function __construct(CacheItemInterface $decorated, $pass, $cipher)
-    {
-        parent::__construct($decorated);
-        $this->cipher = $cipher;
-        $this->password = $pass;
+    public function __construct(
+        CacheItemInterface $decorated,
+        $password,
+        $cipher
+    ) {
+        parent::__construct($cipher, $decorated);
+        $this->password = $password;
     }
 
     protected function isDecryptable()
@@ -60,7 +59,7 @@ class ItemDecorator extends BaseItemDecorator
         return $this->hmac($cipherText, $this->hmac($key, $this->password));
     }
 
-    private function hmac($data, $key)
+    private function hmac($data, $key) 
     {
         return hash_hmac('sha256', $data, $key);
     }
