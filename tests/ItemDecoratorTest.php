@@ -22,10 +22,13 @@ abstract class ItemDecoratorTest extends \PHPUnit_Framework_TestCase
         $instance->expiresAt($expiry);
     }
 
-    public function testProxiesExpiresAfterCallsToDecoratedItem()
+    /**
+     * @dataProvider ttlProvider
+     *
+     * @param $ttl
+     */
+    public function testProxiesExpiresAfterCallsToDecoratedItem($ttl)
     {
-        $ttl = new \DateInterval('P7D');
-
         $decorated = $this->getMock(CacheItemInterface::class);
         $decorated->expects($this->once())
             ->method('expiresAfter')
@@ -34,6 +37,14 @@ abstract class ItemDecoratorTest extends \PHPUnit_Framework_TestCase
 
         $instance = $this->getInstance($decorated);
         $instance->expiresAfter($ttl);
+    }
+
+    public function ttlProvider()
+    {
+        return [
+            [100],
+            [new \DateInterval('P7D')]
+        ];
     }
 
     public function testAuthenticatesCipherText()
@@ -68,6 +79,25 @@ abstract class ItemDecoratorTest extends \PHPUnit_Framework_TestCase
 
         $this->assertNotEquals($data, $decorated->get());
         $this->assertEquals($data, $this->getInstance($decorated)->get());
+    }
+
+    /**
+     * @dataProvider cacheableDataProvider
+     *
+     * @param mixed $data
+     */
+    public function testHoldsPlaintextInMemory($data)
+    {
+        $decorated = $this->getMock(CacheItemInterface::class);
+        $decorated->expects($this->any())
+            ->method('set')
+            ->willReturnSelf();
+        $decorated->expects($this->never())
+            ->method('get');
+
+        $instance = $this->getInstance($decorated);
+        $instance->set($data);
+        $this->assertSame($data, $instance->get());
     }
 
     /**
