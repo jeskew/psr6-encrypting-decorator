@@ -23,7 +23,8 @@
         "paragonie/random_compat": "^2.0"
     },
     "suggest": {
-        "paragonie/random_compat": "To use with PHP <7.0"
+        "paragonie/random_compat": "To use with PHP <7.0",
+        "jsq/iron-php": "^0.4.0"
     },
     "autoload": {
         "psr-4": {
